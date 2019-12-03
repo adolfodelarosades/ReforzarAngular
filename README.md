@@ -109,4 +109,4 @@ Vamos a modificar el contenido del archivo app.component.html co el siguiente c√
 <app-contact></app-contact>
 ```
 
-<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/appcomponent.png">
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/appcomponentmod.png">
