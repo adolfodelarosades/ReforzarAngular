@@ -1,27 +1,27 @@
-# Angularbases
+# Reforzamiento de Angular
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.17.
+Esta sección es muy importante para comprender el corazón de cómo funciona ionic hoy en día, hay temas que posiblemente sean comunes para ustedes, pero este reforzamiento les ayudará a comprender mejor ionic y Angular en general.
 
-## Development server
+Los temas puntuales son:
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+1. Idea de los componentes de Angular
 
-## Code scaffolding
+2. Componentes hijos y padres
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+3. Enviar información entre componentes
 
-## Build
+4. Navegación mediante el RouterModule
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+5. Módulos en Angular
 
-## Running unit tests
+6. LazyLoad
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+7. Servicios
 
-## Running end-to-end tests
+8. Consumo de APIS
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+9. Estructura del proyecto de Angular
 
-## Further help
+10. Uso de servicios de forma global
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+Estos conceptos son usados en casi toda aplicación de ionic hoy en día, por lo que conocerlos ayudará a que el código de Angular usando en ionic no sea extraño para ustedes.
