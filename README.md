@@ -25,3 +25,19 @@ Los temas puntuales son:
 10. Uso de servicios de forma global
 
 Estos conceptos son usados en casi toda aplicación de ionic hoy en día, por lo que conocerlos ayudará a que el código de Angular usando en ionic no sea extraño para ustedes.
+
+## Crear nuevo proyecto Angular.
+
+`ng new angularbases`
+
+## Ejecutar el proyecto 
+
+`ng serve -o`
+
+Se ejecuta en la URL
+
+`http://localhost:4200/`
+
+## Añadir Bootstrap a index.html
+
+`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">`
