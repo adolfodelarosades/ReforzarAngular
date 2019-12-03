@@ -77,6 +77,8 @@ UPDATE src/app/app.module.ts (398 bytes)
 NOTE: The "dryRun" flag means no changes were made.
 ```
 
+Como es exactamente lo que queremos hacer ejecutamos el comando sin esos parámetros, es decir:
+
 `ng g c pages/about`
 
 Dentro de **app/pages/about** se crean todos los archivos del componente, así como también se modifica el archivo **src/app/app.module.ts** para incluir la referencia al nuevo componente.
@@ -87,16 +89,24 @@ Dentro de **app/pages/about** se crean todos los archivos del componente, así c
 
 Pasa lo mismo que al crear el componente about.
 
+### Crear el componente home
+
+`ng g c pages/home`
+
 ### Componente app.component
 
 El componente `app.component` es el componente inicial que se se carga cuando ejecutamos nuestra aplicación:
 
-<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/appcomponent.png">
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/appcomponent.png">
 
+Vamos a modificar el contenido del archivo app.component.html co el siguiente código:
 
+```
+<h1>App Component</h1>
 
+<app-home></app-home>
+<app-about></app-about>
+<app-contact></app-contact>
+```
 
-
-Como es exactamente lo que queremos hacer ejecutamos el comando sin esos parámetros, es decir:
-
-
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/appcomponent.png">
