@@ -76,6 +76,7 @@ UPDATE src/app/app.module.ts (398 bytes)
 
 NOTE: The "dryRun" flag means no changes were made.
 ```
+Como es exactamente lo que queremos hacer ejecutamos el comando sin esos parámetros, es decir:
 
 `ng g c pages/about`
 
@@ -92,11 +93,3 @@ Pasa lo mismo que al crear el componente about.
 El componente `app.component` es el componente inicial que se se carga cuando ejecutamos nuestra aplicación:
 
 <img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/appcomponent.png">
-
-
-
-
-
-Como es exactamente lo que queremos hacer ejecutamos el comando sin esos parámetros, es decir:
-
-
