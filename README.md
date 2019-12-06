@@ -468,3 +468,183 @@ export class AppModule { }
 **Si volvemos a cargar la página los errores siguen mostrandose, este es un pequeño error que tiene Angular CLI que no refresca bien cuando creamos modulos, la forma de solucionarlo es dar de baja el servidor y volverlo a cargar.**
 
 Una vez que se cargo nuevamente el servidor ya podemos ver nuestra aplicación sin errores, nuevamente puedo navegar a `Home`, `About` y `Contact`. Funciona mi aplicación con la diferencia de que ahora tengo un `PagesModule`, todas las nuevas páginas que tenga las puedo declarar en el `pages.module` en lugar del `app.module` eviatndo tocarlo para nuevas páginas. Pero aun con esta mejora sigue siendo un poco engorrozo ya que por cada nueva página la debo incluir en el `pages.module` tanto en el la declaración como en la exportación, y ademas cuando lo cargamos de esta manera todos los modulos forman parte del `Bundle` principal, es decir que cuando se genera la aplicación de producción todos estos archivos se compactaran en un unico archivo final.
+
+## LazyLoad de PostsComponent
+
+En esta sección vamos a crear un nuevo componente el cual va a ser cargado de manera perezosa. utilizando LazyLoad, incluso la ruta también puede ser cargada de manera perezosa.
+
+### Crear carpeta posts dentro de pages
+
+Dentro de esta carpeta vamos a crear todo lo relacionado a los posteos que hagamos. 
+
+### Crear modulo posts y su archivo de rutas
+
+Vamos a crear un modulo posts (lo de la carpeta anterior estaria de más usando el siguiente comando) `ng g m pages/posts` vamos agregar la bandera `--routing`
+para que me cree un archivo de configuración de rutas, podemos agregar `--dry-run` para asegurarme de que todo esto va a crearse:
+
+`ng g m pages/posts --routing --dry-run`
+
+Nos indica:
+
+```
+CREATE src/app/pages/posts/posts-routing.module.ts (249 bytes)
+CREATE src/app/pages/posts/posts.module.ts (276 bytes)
+
+NOTE: The "dryRun" flag means no changes were made.
+```
+
+Como es exactamente lo que queremos hacer ejecutamos el comando sin el `--dry-run`:
+
+`ng g m pages/posts --routing`
+
+Nos indica:
+
+```
+CREATE src/app/pages/posts/posts-routing.module.ts (249 bytes)
+CREATE src/app/pages/posts/posts.module.ts (276 bytes)
+```
+Los dos archivos han sido creados.
+
+El archivo `posts.module.ts` tiene una importación del `PostsRoutingModule`:
+
+```js
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+import { PostsRoutingModule } from './posts-routing.module';
+
+
+@NgModule({
+  declarations: [],
+  imports: [
+    CommonModule,
+    PostsRoutingModule
+  ]
+})
+export class PostsModule { }
+```
+
+Si vemos el archivo `posts-routing.module.ts` es muy similar al archivo de rutas que creamos manualmente, con la única de diferencia que en lugar de usar `forRoot` usa `forChild` por ser una ruta hija.
+
+```js
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+
+
+const routes: Routes = [];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
+})
+export class PostsRoutingModule { }
+```
+
+### Crear el componente posts
+
+Vamos a crear el componente posts:
+
+`ng g c pages/posts --dry-run`
+
+Nos indica:
+
+```
+CREATE src/app/pages/posts/posts.component.html (20 bytes)
+CREATE src/app/pages/posts/posts.component.spec.ts (621 bytes)
+CREATE src/app/pages/posts/posts.component.ts (265 bytes)
+CREATE src/app/pages/posts/posts.component.css (0 bytes)
+UPDATE src/app/pages/posts/posts.module.ts (342 bytes)
+
+NOTE: The "dryRun" flag means no changes were made.
+```
+
+como es lo que queremos ejecutamos el comando sin `--dry-run`
+
+`ng g c pages/posts`
+
+Se han creado los 4 archivos dentro de la carpeta posts junto con los dos archivos que habiamos creado del modulo y la ruta (como trabaja Ionic).
+
+Nos indica:
+
+```
+CREATE src/app/pages/posts/posts.component.html (20 bytes)
+CREATE src/app/pages/posts/posts.component.spec.ts (621 bytes)
+CREATE src/app/pages/posts/posts.component.ts (265 bytes)
+CREATE src/app/pages/posts/posts.component.css (0 bytes)
+UPDATE src/app/pages/posts/posts.module.ts (342 bytes)
+```
+
+Notese que indica que el archivo `posts.module.ts` ha sido modificado para insertar la declaración del componente `declarations: [PostsComponent],`.
+
+### Añadir ruta en nuestro `posts-routing.module.ts`
+
+Añadamos el siguiente código:
+
+```
+import { PostsComponent } from './posts.component';
+
+const routes: Routes = [
+  {
+    path: '',
+    component: PostsComponent
+  }
+];
+```
+Cual debería ser el `path` que tengamos aquí, asumamos que queramos tener algo así como: `localhost:4200/posts` podriamos pensar que tendriamos que poner `path: 'posts',` en teoría no esta mal pero esta es una **ruta hija**, **lo que realmente queremos hacer es que todo este modulo con su definicion de rutas y componentes sea cargado de manera perezosa**, y que sea cargado cuando sea necesario, y ¿cuando es necesario? 
+
+### Incluir de manera perezosa nuestro modulo posts en el app-routing.module
+
+Vamos a definirnos una nueva ruta en `app-routing.module.ts` para hacer referencia a los `posts`:
+
+```
+{
+  path: 'posts',
+  component: PostComponent
+},
+```
+Si lo hacemos de esta manera, en primera nos indica que `Cannot find name 'PostComponent'.ts(2304)`, pero sobre todo no estariamos cargando nuestro modulo de manera perezosa que es realmente lo que queremos, por lo que el componente no iria aquí. 
+
+Lo que queremos realmete es cargar el modulo que tiene toda la información de los `posts`, lo tendriamos que hacer de la siguiente forma:
+
+```
+{
+  path: 'posts',
+  loadChildren: './pages/posts/posts.module#PostsModule'
+},
+```
+`loadChildren` lo que indica es que vamos a usar la carga perezosa o LazyLoad, para cargar el modulo `PostsModule` que se encuentra en la ruta `./pages/posts/posts.module`.
+
+### Añadir la ruta posts al menu
+
+En el archivo `menu.component.ts` añadimos la nueva opción de menú:
+
+```
+{
+  name: 'Posts',
+  path: '/posts'
+}
+```
+Si probamos la navegación a `Posts` nos carga el componente:
+
+**En caso de no ser cargado damos de baja el server y lo volvemos a cargar. (Por que creamos un nuevo modulo)**.
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/posts.png">
+
+Como realmente podemos saber si estamos cargando de manera perezosa el componente `Posts`, como habiamos dicho anteriormente al usar `loadChildren` indica que vamos a usar LazyLoad. Para terminar de comprobarlo abramos las Herramientas de Desarrollador especificamente en la ventana Network y recargamos la opción de menú `Home`, tendremos una pantalla como la siguiente:
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/networkhome.png">
+
+Como se puede observar el archivo `vendor.js` es el que más tarda en cargar por que contiene varias cosas entre y entre otras cosas por que estamos en modo de desarrollo, se podra optimizar para modo producción. 
+
+Si entramos a la opción de `Posts`:
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/networkposts.png">
+
+Detecta que necesesitamos cargar todo lo referente al modulo de posts y carga el archivo `pages-posts-posts-module.js` donde viene todo lo referente a ese modulo entre ello el modulo de rutas y el componente `posts`.
+
+**Todo esto que hemos tenido que hacer manualmente para generear la carga perezosa o LazyLoad en Ionic lo hace automaticamente, teniendo el beneficio de que la aplicación es mucho más ligera y cuando cargue la primera pantalla posiblemente solo cargue la primera página mediante LazyLoad y la aplicación se va a desplegar en el dispositivo sumamente rapida.**
+
+
+
+
+
