@@ -100,7 +100,7 @@ El componente `app.component` es el componente inicial que se se carga cuando ej
 
 Vamos a modificar el contenido del archivo app.component.html con el siguiente código:
 
-```
+```js
 <h1>App Component</h1>
 
 <app-home></app-home>
@@ -134,7 +134,7 @@ que el archivo será creado directamente en **app**, con `--flat` no nos crea el
 
 Con esto me crea el archivo `app-routing.module.ts` el cual debemos abrir. Importaremos las `Routes` que es un tipo manejado por Angular que nos permite implementar las rutas y metetemos una ruta por cada página (componente) que tengamos así como una para cualquier ruta que se meta y no exista que nos lleve a `home`:
 
-```
+```js
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { AboutComponent } from './pages/about/about.component';
@@ -160,7 +160,7 @@ const routes: Routes = [
 ];
 ```
 Tenemos tambien la directiva `@NgModule`
-```
+```js
 @NgModule({
   declarations: [],
   imports: [
@@ -172,7 +172,7 @@ export class AppRoutingModule { }
 El `CommonModule` nos permite usar entre otras cosas directivas como `*ngIf` o `*ngFor` pero eso no lo vamos a usar aquí en la gegestión de las rutas, por lo que lo eliminaremos. 
 Lo que usaremos es:
 
-```
+```js
 @NgModule({
   imports: [
     RouterModule.forRoot( routes )
@@ -187,7 +187,7 @@ El `RouterModule.forRoot()` nos indica que usaremos el *Sistema de Rutas Princip
 
 Para que angular identifique que el anterior es mi archivo de configuración de rutas necesitamos importarlo en el `app.module.ts` que es el modulo principal de la aplicación, lo colocamos en los `imports`:
 
-```
+```js
   imports: [
     BrowserModule,
     AppRoutingModule
@@ -196,7 +196,7 @@ Para que angular identifique que el anterior es mi archivo de configuración de 
 
 Si recargamos la pagina nos redirigue a `http://localhost:4200/home`, si escribimos cualquier cosa como: `http://localhost:4200/gggggssss` nos redirigue a `http://localhost:4200/home`, si escribimos `http://localhost:4200/contact` funciona pero sigue mostrando lo mismo que cuando cargamos la `home`, esto pasa por que en el `app.component.html` le estamos que renderice esto:
 
-```
+```js
 <h1>App Component</h1>
 
 <app-home></app-home>
@@ -206,7 +206,7 @@ Si recargamos la pagina nos redirigue a `http://localhost:4200/home`, si escribi
 
 En la aplicación no le estamos diciendo donde renderizar estos componentes, para esto vamos a cambiar el código  y usaremos el elemente `router-outlet`, cambiamos el código anterior por este:
 
-```angular
+```js
 <h1>App Component</h1>
 
 <router-outlet></router-outlet>
@@ -236,31 +236,31 @@ UPDATE src/app/app.module.ts (734 bytes)
 
 Abrimos el archivo `menu.component.html` y vemos su contenido:
 
-```
+```js
 <p>menu works!</p>
 ```
 Lo cambiaremos por:
 
-```
+```js
 <ul class="list-group">
-    <a routerLink="/home"
-       class="list-group-item">
-       Home
-    </a>
-    <a routerLink="/about"
-       class="list-group-item">
-       About
-    </a>
-    <a routerLink="/contact"
-       class="list-group-item">
-       Contact
-    </a>
+  <a routerLink="/home"
+     class="list-group-item">
+     Home
+  </a>
+  <a routerLink="/about"
+     class="list-group-item">
+     About
+  </a>
+  <a routerLink="/contact"
+     class="list-group-item">
+     Contact
+  </a>
 </ul>
 ```
 
 Ya tenemos nuestro componente `menu` pero para que pueda ser renderizado lo metemos en nuestro `app.component.html`:
 
-```
+```js
 <h1>App Component</h1>
 
 <app-menu></app-menu>
@@ -273,44 +273,44 @@ Por lo que nuestra pantalla se vera así:
 
 La anterior es una forma de hacer nuestro menú, poniendo cada una de nuestras opciones del menú en el archivo html. Vamos a hacer algunos cambios, abrimos el archivo `menu.component.ts` donde insertaremos un array de objetos que representan  cada una de las rutas del menú:
 
-```
+```js
 rutas = [
-    {
-      name: 'Home',
-      path: '/home'
-    },
-    {
-      name: 'About',
-      path: '/about'
-    },
-    {
-      name: 'Contact',
-      path: '/contact'
-    }
-  ];
+  {
+    name: 'Home',
+    path: '/home'
+  },
+  {
+    name: 'About',
+    path: '/about'
+  },
+  {
+    name: 'Contact',
+    path: '/contact'
+  }
+];
 ```
 
 Como este array lo estamos declarando en nuestro archivo `ts` lo podemos usar en el archivo `html` para cargar nuestras rutas dinámicamente:
 
-```
+```js
 <ul class="list-group">
-    <a routerLink="{{ ruta.path }}"
-       class="list-group-item"
-       *ngFor="let ruta of rutas">
-       {{ ruta.name }}
-    </a>
+  <a routerLink="{{ ruta.path }}"
+     class="list-group-item"
+     *ngFor="let ruta of rutas">
+     {{ ruta.name }}
+  </a>
 </ul>
 ```
 
 Si cargamos la página nuevamente el menú sigue viendose igual pero hemos optimizado el código, la anterior es una forma de inyectar los valores, pero existe otra forma diferente de inyectarlos en los atributos que en este caso se puede usar con el atributo `routerLink`:
 
-```
+```js
 <ul class="list-group">
-    <a [routerLink]="ruta.path"
-       class="list-group-item"
-       *ngFor="let ruta of rutas">
-       {{ ruta.name }}
-    </a>
+  <a [routerLink]="ruta.path"
+    class="list-group-item"
+    *ngFor="let ruta of rutas">
+    {{ ruta.name }}
+  </a>
 </ul>
 ```
 
@@ -322,14 +322,14 @@ Nuevamente si cargamos el sitio el menú sigue funcionando corrrectamente.
 
 A medida que hemos ido añadiendo componentes estos se han ido insertando en el `app.module.ts`:
 
-```
+```js
 declarations: [
-    AppComponent,
-    AboutComponent,
-    ContactComponent,
-    HomeComponent,
-    MenuComponent
-  ],
+  AppComponent,
+  AboutComponent,
+  ContactComponent,
+  HomeComponent,
+  MenuComponent
+],
 ```
 Si crearamos más componentes estos se irian insertando aquí, lo ideal es que el `app.modulo.ts` estuviera lo más limpio posible y facil de leer, los componentes anteriores podrian estar organizado en otro lugar, eso es lo que haremos aquí , crear un modulo que nos permita agrupar todas las páginas.
 
@@ -343,7 +343,7 @@ Nos indica que ha sido creado `CREATE src/app/pages/pages.module.ts (191 bytes)`
 
 La idea es que `Home`, `About` y `Contact` no esten en `app.module.ts`, quitemoslos.
 
-```
+```js
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
@@ -373,11 +373,9 @@ Uncaught Error: Component HomeComponent is not part of any NgModule or the modul
 ```
 Para arreglar este desastre nos vamos a `pages.module.ts` veamos su contenido:
 
-```
+```js
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-
 
 @NgModule({
   declarations: [],
@@ -445,6 +443,3 @@ export class AppModule { }
 **Si volvemos a cargar la página los errores siguen mostrandose, este es un pequeño error que tiene Angular CLI que no refresca bien cuando creamos modulos, la forma de solucionarlo es dar de baja el servidor y volverlo a cargar.**
 
 Una vez que se cargo nuevamente el servidor ya podemos ver nuestra aplicación sin errores, nuevamente puedo navegar a `Home`, `About` y `Contact`. Funciona mi aplicación con la diferencia de que ahora tengo un `PagesModule`, todas las nuevas páginas que tenga las puedo declarar en el `pages.module` en lugar del `app.module` eviatndo tocarlo para nuevas páginas. Pero aun con esta mejora sigue siendo un poco engorrozo ya que por cada nueva página la debo incluir en el `pages.module` tanto en el la declaración como en la exportación, y ademas cuando lo cargamos de esta manera todos los modulos forman parte del `Bundle` principal, es decir que cuando se genera la aplicación de producción todos estos archivos se compactaran en un unico archivo final.
-
-
-
