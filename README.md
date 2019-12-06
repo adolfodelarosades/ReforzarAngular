@@ -580,7 +580,7 @@ Notese que indica que el archivo `posts.module.ts` ha sido modificado para inser
 
 Añadamos el siguiente código:
 
-```
+```js
 import { PostsComponent } from './posts.component';
 
 const routes: Routes = [
@@ -596,7 +596,7 @@ Cual debería ser el `path` que tengamos aquí, asumamos que queramos tener algo
 
 Vamos a definirnos una nueva ruta en `app-routing.module.ts` para hacer referencia a los `posts`:
 
-```
+```js
 {
   path: 'posts',
   component: PostComponent
@@ -606,7 +606,7 @@ Si lo hacemos de esta manera, en primera nos indica que `Cannot find name 'PostC
 
 Lo que queremos realmete es cargar el modulo que tiene toda la información de los `posts`, lo tendriamos que hacer de la siguiente forma:
 
-```
+```js
 {
   path: 'posts',
   loadChildren: './pages/posts/posts.module#PostsModule'
@@ -618,7 +618,7 @@ Lo que queremos realmete es cargar el modulo que tiene toda la información de l
 
 En el archivo `menu.component.ts` añadimos la nueva opción de menú:
 
-```
+```js
 {
   name: 'Posts',
   path: '/posts'
