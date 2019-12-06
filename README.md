@@ -206,7 +206,7 @@ Si recargamos la pagina nos redirigue a `http://localhost:4200/home`, si escribi
 
 En la aplicación no le estamos diciendo donde renderizar estos componentes, para esto vamos a cambiar el código  y usaremos el elemente `router-outlet`, cambiamos el código anterior por este:
 
-```
+```angular
 <h1>App Component</h1>
 
 <router-outlet></router-outlet>
