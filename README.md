@@ -112,6 +112,8 @@ Vamos a modificar el contenido del archivo app.component.html con el siguiente c
 
 ## Implementar las rutas de nuestra aplicación
 
+### Crear el Módulo de Rutas
+
 Vamos a implementar un sistema de rutas par nuestra aplicación. Dentro del directorio *app* vamos a crear un manejador de las rutas, se puede hacer mediante CLI pero vamos a crearlo manualmente, con el comando:
 
 `ng g m appRouting --dry-run`
@@ -132,7 +134,11 @@ que el archivo será creado directamente en **app**, con `--flat` no nos crea el
 
 `ng g m appRouting --flat`
 
-Con esto me crea el archivo `app-routing.module.ts` el cual debemos abrir. Importaremos las `Routes` que es un tipo manejado por Angular que nos permite implementar las rutas y metetemos una ruta por cada página (componente) que tengamos así como una para cualquier ruta que se meta y no exista que nos lleve a `home`:
+Con esto me crea el archivo `app-routing.module.ts` el cual debemos abrir. 
+
+### Añadir nuestras Rutas
+
+Importaremos las `Routes` que es un tipo manejado por Angular que nos permite implementar las rutas y metetemos una ruta por cada página (componente) que tengamos así como una para cualquier ruta que se meta y no exista que nos lleve a `home`:
 
 ```js
 import { Routes } from '@angular/router';
@@ -204,6 +210,8 @@ Si recargamos la pagina nos redirigue a `http://localhost:4200/home`, si escribi
 <app-contact></app-contact>
 ```
 
+### Uso de nuestro Módulo de Rutas
+
 En la aplicación no le estamos diciendo donde renderizar estos componentes, para esto vamos a cambiar el código  y usaremos el elemente `router-outlet`, cambiamos el código anterior por este:
 
 ```js
@@ -220,6 +228,8 @@ Al cargar de nuevo la aplicación, cada componente se cargara cuando se ponga su
 
 ## RouterLink y MenuComponent
 
+### Crear el componente menu
+
 Vamos a crear una funcionalidad de menú sencilla, vamos a crear un componente que no representará una página, sino un componente independiente:
 
 `ng g c components/menu`
@@ -233,6 +243,8 @@ CREATE src/app/components/menu/menu.component.ts (261 bytes)
 CREATE src/app/components/menu/menu.component.css (0 bytes)
 UPDATE src/app/app.module.ts (734 bytes)
 ```
+
+### Añadir las opciones del menú
 
 Abrimos el archivo `menu.component.html` y vemos su contenido:
 
@@ -258,6 +270,8 @@ Lo cambiaremos por:
 </ul>
 ```
 
+### Renderizar el Ménu
+
 Ya tenemos nuestro componente `menu` pero para que pueda ser renderizado lo metemos en nuestro `app.component.html`:
 
 ```js
@@ -270,6 +284,8 @@ Ya tenemos nuestro componente `menu` pero para que pueda ser renderizado lo mete
 Por lo que nuestra pantalla se vera así:
 
 <img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/menu.png">
+
+### Crear el Ménu Dinamicamente
 
 La anterior es una forma de hacer nuestro menú, poniendo cada una de nuestras opciones del menú en el archivo html. Vamos a hacer algunos cambios, abrimos el archivo `menu.component.ts` donde insertaremos un array de objetos que representan  cada una de las rutas del menú:
 
@@ -333,6 +349,8 @@ declarations: [
 ```
 Si crearamos más componentes estos se irian insertando aquí, lo ideal es que el `app.modulo.ts` estuviera lo más limpio posible y facil de leer, los componentes anteriores podrian estar organizado en otro lugar, eso es lo que haremos aquí , crear un modulo que nos permita agrupar todas las páginas.
 
+### Crear el modulo pages
+
 En pages nos crearemos un nuevo modulo:
 
 `ng g m pages/pages --flat`
@@ -340,6 +358,8 @@ En pages nos crearemos un nuevo modulo:
 Le decimos que nos cree un modulo `m` en el directorio `pages` y que se llame `pages` y que no cree ninguna carpeta.
 
 Nos indica que ha sido creado `CREATE src/app/pages/pages.module.ts (191 bytes)`.
+
+### Eliminar las pages de app.module.ts
 
 La idea es que `Home`, `About` y `Contact` no esten en `app.module.ts`, quitemoslos.
 
@@ -371,6 +391,9 @@ Al ejecutar nuevamente la aplicación nos marca una serie de errores y las pági
 Uncaught Error: Component HomeComponent is not part of any NgModule or the module has not been imported into your module.
     at JitCompiler._createCompiledHostTemplate (compiler.js:25915)
 ```
+
+### Incluir las pages en pages.module.ts
+
 Para arreglar este desastre nos vamos a `pages.module.ts` veamos su contenido:
 
 ```js
@@ -412,6 +435,8 @@ import { ContactComponent } from './contact/contact.component';
 })
 export class PagesModule { }
 ```
+
+### Importar pages.module dentro de app.module.ts
 
 Hasta aquí el `pages.module.ts` ya conoce cuales son los componentes declarados, para que la aplicación de Angular sepa que esos componentes existen, tengo que importar el `pages.modulo.ts` en mi `app.module.ts` se coloca en los `imports`:
 
