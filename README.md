@@ -317,3 +317,134 @@ Si cargamos la página nuevamente el menú sigue viendose igual pero hemos optim
 Cuando usamos los corchetes lo que estamos haciendo es enlazando el valor de la variable al elemento.
 
 Nuevamente si cargamos el sitio el menú sigue funcionando corrrectamente.
+
+## Módulo de páginas
+
+A medida que hemos ido añadiendo componentes estos se han ido insertando en el `app.module.ts`:
+
+```
+declarations: [
+    AppComponent,
+    AboutComponent,
+    ContactComponent,
+    HomeComponent,
+    MenuComponent
+  ],
+```
+Si crearamos más componentes estos se irian insertando aquí, lo ideal es que el `app.modulo.ts` estuviera lo más limpio posible y facil de leer, los componentes anteriores podrian estar organizado en otro lugar, eso es lo que haremos aquí , crear un modulo que nos permita agrupar todas las páginas.
+
+En pages nos crearemos un nuevo modulo:
+
+`ng g m pages/pages --flat`
+
+Le decimos que nos cree un modulo `m` en el directorio `pages` y que se llame `pages` y que no cree ninguna carpeta.
+
+Nos indica que ha sido creado `CREATE src/app/pages/pages.module.ts (191 bytes)`.
+
+La idea es que `Home`, `About` y `Contact` no esten en `app.module.ts`, quitemoslos.
+
+```
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+
+import { AppComponent } from './app.component';
+import { AppRoutingModule } from './app-routing.module';
+import { MenuComponent } from './components/menu/menu.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    MenuComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+Al ejecutar nuevamente la aplicación nos marca una serie de errores y las páginas ya no van.
+
+```
+Uncaught Error: Component HomeComponent is not part of any NgModule or the module has not been imported into your module.
+    at JitCompiler._createCompiledHostTemplate (compiler.js:25915)
+```
+Para arreglar este desastre nos vamos a `pages.module.ts` veamos su contenido:
+
+```
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+
+
+@NgModule({
+  declarations: [],
+  imports: [
+    CommonModule
+  ]
+})
+export class PagesModule { }
+```
+
+Aquí insertaremos las declaraciones que anteriormente teniamos en el `app.module.ts`, nos quedara así:
+
+```js
+import { AboutComponent } from './about/about.component';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HomeComponent } from './home/home.component';
+import { ContactComponent } from './contact/contact.component';
+
+@NgModule({
+  declarations: [
+    HomeComponent,
+    AboutComponent,
+    ContactComponent
+  ],
+  exports: [
+    HomeComponent,
+    AboutComponent,
+    ContactComponent
+  ],
+  imports: [
+    CommonModule
+  ]
+})
+export class PagesModule { }
+```
+
+Hasta aquí el `pages.module.ts` ya conoce cuales son los componentes declarados, para que la aplicación de Angular sepa que esos componentes existen, tengo que importar el `pages.modulo.ts` en mi `app.module.ts` se coloca en los `imports`:
+
+```js
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+
+import { AppComponent } from './app.component';
+import { AppRoutingModule } from './app-routing.module';
+import { MenuComponent } from './components/menu/menu.component';
+import { PagesModule } from './pages/pages.module';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    MenuComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    PagesModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+**Si volvemos a cargar la página los errores siguen mostrandose, este es un pequeño error que tiene Angular CLI que no refresca bien cuando creamos modulos, la forma de solucionarlo es dar de baja el servidor y volverlo a cargar.**
+
+Una vez que se cargo nuevamente el servidor ya podemos ver nuestra aplicación sin errores, nuevamente puedo navegar a `Home`, `About` y `Contact`. Funciona mi aplicación con la diferencia de que ahora tengo un `PagesModule`, todas las nuevas páginas que tenga las puedo declarar en el `pages.module` en lugar del `app.module` eviatndo tocarlo para nuevas páginas. Pero aun con esta mejora sigue siendo un poco engorrozo ya que por cada nueva página la debo incluir en el `pages.module` tanto en el la declaración como en la exportación, y ademas cuando lo cargamos de esta manera todos los modulos forman parte del `Bundle` principal, es decir que cuando se genera la aplicación de producción todos estos archivos se compactaran en un unico archivo final.
+
+
+
