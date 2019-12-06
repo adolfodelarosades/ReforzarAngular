@@ -218,4 +218,102 @@ Al cargar de nuevo la aplicación, cada componente se cargara cuando se ponga su
 <img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/contact.png">
 <img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/about.png">
 
+## RouterLink y MenuComponent
 
+Vamos a crear una funcionalidad de menú sencilla, vamos a crear un componente que no representará una página, sino un componente independiente:
+
+`ng g c components/menu`
+
+Creamos un componente `c` en la carpeta `components` y se llamará `menu`. Se nos indican las acciones realizadas:
+
+```
+CREATE src/app/components/menu/menu.component.html (19 bytes)
+CREATE src/app/components/menu/menu.component.spec.ts (614 bytes)
+CREATE src/app/components/menu/menu.component.ts (261 bytes)
+CREATE src/app/components/menu/menu.component.css (0 bytes)
+UPDATE src/app/app.module.ts (734 bytes)
+```
+
+Abrimos el archivo `menu.component.html` y vemos su contenido:
+
+```
+<p>menu works!</p>
+```
+Lo cambiaremos por:
+
+```
+<ul class="list-group">
+    <a routerLink="/home"
+       class="list-group-item">
+       Home
+    </a>
+    <a routerLink="/about"
+       class="list-group-item">
+       About
+    </a>
+    <a routerLink="/contact"
+       class="list-group-item">
+       Contact
+    </a>
+</ul>
+```
+
+Ya tenemos nuestro componente `menu` pero para que pueda ser renderizado lo metemos en nuestro `app.component.html`:
+
+```
+<h1>App Component</h1>
+
+<app-menu></app-menu>
+<router-outlet></router-outlet>
+```
+
+Por lo que nuestra pantalla se vera así:
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/menu.png">
+
+La anterior es una forma de hacer nuestro menú, poniendo cada una de nuestras opciones del menú en el archivo html. Vamos a hacer algunos cambios, abrimos el archivo `menu.component.ts` donde insertaremos un array de objetos que representan  cada una de las rutas del menú:
+
+```
+rutas = [
+    {
+      name: 'Home',
+      path: '/home'
+    },
+    {
+      name: 'About',
+      path: '/about'
+    },
+    {
+      name: 'Contact',
+      path: '/contact'
+    }
+  ];
+```
+
+Como este array lo estamos declarando en nuestro archivo `ts` lo podemos usar en el archivo `html` para cargar nuestras rutas dinámicamente:
+
+```
+<ul class="list-group">
+    <a routerLink="{{ ruta.path }}"
+       class="list-group-item"
+       *ngFor="let ruta of rutas">
+       {{ ruta.name }}
+    </a>
+</ul>
+```
+
+Si cargamos la página nuevamente el menú sigue viendose igual pero hemos optimizado el código, la anterior es una forma de inyectar los valores, pero existe otra forma diferente de inyectarlos en los atributos que en este caso se puede usar con el atributo `routerLink`:
+
+```
+<ul class="list-group">
+    <a [routerLink]="ruta.path"
+       class="list-group-item"
+       *ngFor="let ruta of rutas">
+       {{ ruta.name }}
+    </a>
+</ul>
+```
+
+Cuando usamos los corchetes lo que estamos haciendo es enlazando el valor de la variable al elemento.
+
+Nuevamente si cargamos el sitio el menú sigue funcionando corrrectamente.
