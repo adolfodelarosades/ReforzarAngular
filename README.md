@@ -1244,3 +1244,10 @@ export class PostsComponent implements OnInit {
 
 Notese que ahora si el evento que se ejecuta es el del padre, es decir en el Hijo sucede el evento, pero este lo emite al Padre, este lo escucha y ejecuta un método propio como respuesta.
  
+## Código fuente de la sección
+
+Código de la sección
+En el material adjunto tienen el código fuente que use en esta sección, lo pueden descargar y usarlo para comprobar lo que deseen.
+
+Recuerden que no van los módulos de node, por lo que deben de ejecutar el comando `npm install`
+
