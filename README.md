@@ -791,3 +791,172 @@ En teoria `this.dataService.getPosts()` llamaría al método `getPosts()` del se
 <img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/getPosts.png">
 
 Podemos observar como recupera hasta 100 post.
+
+## Mostrar POSTS en el componente
+
+Vamos a crear una variable `mensajes` de tipo `any[]` donde vamos a amacenar los posts recibidos `this.mensajes = posts;`, como esto nos da un error debemos declarar a `posts` de ese tipo `.subscribe( (posts: any[] ) => {`, nuestro código queda así:
+
+```js
+import { Component, OnInit } from '@angular/core';
+import { DataService } from 'src/app/service/data.service';
+
+@Component({
+  selector: 'app-posts',
+  templateUrl: './posts.component.html',
+  styleUrls: ['./posts.component.css']
+})
+export class PostsComponent implements OnInit {
+
+  mensajes: any[] = [];
+
+  constructor( private dataService: DataService ) { }
+
+  ngOnInit() {
+    this.dataService.getPosts()
+      .subscribe( (posts: any[] ) => {
+        console.log(posts);
+        this.mensajes = posts;
+      });
+  }
+}
+```
+
+Con esto ya podemos parar al archivo `posts.component.html` y sustituir el array `[1,2,3,4,5]` por `mensajes`, con este pequeño cambio ya se pintan en pantalla los 100 posts recuperados. Vamos a hacer algunos otros ajustes para mostrar bien toda la información, el código queda asi:
+
+```js
+<h1>Posts</h1>
+<ul class="list-group">
+  <li *ngFor="let mensaje of mensajes" class="list-group-item">
+    <h3>{{ mensaje.title }}</h3>
+    <p>{{ mensaje.body }} </p>
+  </li>
+</ul>
+
+```
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/getPostsInfo.png">
+
+### Nos suscribimos cada que entramos a Posts
+
+Trabajar de esta forma tiene un pequeño inconveniente, ya que cada que entramos al componente `Posts` nos estamos suscribiendo a un elemento, vamos a poner un mensaje en `ngOnInit` para ver claramente que se dispara cada que entramos en el:
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/getPostsInit.png">
+
+Como se ve claramente en la imagen cada que entramos en la opción `Posts` nos suscribimos nuevamente al elemento, esto puede provocar desperdicio de memoria por que estamos suscribiendo nuevamente sin cancelar la suscripción anterior.
+
+### Uso del Pipe Async para cancelar suscripción antes de abrir otra
+
+Hay varias formas de solucionar esto, una seria asignar la suscripción a una variable y cuando llamemos al método `ngOnDestroy` es decir que cuando la página se va a destruir podemos cancelar la suscripción, para prevenir errores o falta de memoria en caso de que se acceda a `Posts` muchas veces.
+
+Existe otra forma de solucionarlo, angular nos ofrece un `pipe` que automaticamente cancela la suscripción cuando ya no se utiliza, es el `pipe async`. 
+
+Vamos a modificar nuestro código para utilizar dicho pipe, en el archivo `posts.component.ts` vamos a cambiar el código para que quede así:
+
+```js
+import { Component, OnInit } from '@angular/core';
+import { DataService } from 'src/app/service/data.service';
+
+@Component({
+  selector: 'app-posts',
+  templateUrl: './posts.component.html',
+  styleUrls: ['./posts.component.css']
+})
+export class PostsComponent implements OnInit {
+
+  mensajes: any;
+
+  constructor( private dataService: DataService ) { }
+
+  ngOnInit() {
+    console.log('INIT!');
+
+    this.mensajes = this.dataService.getPosts();
+      //.subscribe( (posts: any[] ) => {
+      //  console.log(posts);
+      //  this.mensajes = posts;
+      //});
+  }
+}
+```
+
+1. En primer lugar `mensajes` ya no se declara como array sino solo de tipo `any`, es decir `mensajes: any;`.
+
+2. En segundo lugar ya no nos suscribimos, simplemente igualamos nuestro metodo del servicio a mensajes:
+
+`this.mensajes = this.dataService.getPosts();`
+
+Con esto lo que se almacena en `mensajes` es un apuntador al valor de los posts, es decir de la suscripción que esta regresando. Con estos cambios la página a dejado de funcionar. 
+
+```
+PostsComponent.html:1 ERROR Error: Cannot find a differ supporting object '[object Object]' of type 'object'. NgFor only supports binding to Iterables such as Arrays.
+```
+
+Nos falta que en nuestro archivo `posts.component.html` pasar los mensajes por el `pipe async`:
+
+```js
+<h1>Posts</h1>
+<ul class="list-group">
+  <li *ngFor="let mensaje of mensajes | async" class="list-group-item">
+    <h3>{{ mensaje.title }}</h3>
+    <p>{{ mensaje.body }} </p>
+  </li>
+</ul>
+```
+Al hacer esto nuestra página vuelve a trabajar, **con la diferencia de que cuando salga del component `Posts` se cancela la suscripción y cuando vuelvo a entrar se vuelve a crear la suscripción** lo que optimiza nuestra página.
+
+**Pero esto tiene un inconveniente, ya no tengo lo que viene en cada uno de los elementos, ya no se pinta:
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/getPostsSinInfo.png">
+
+Podría llamar al URL del servicio `https://jsonplaceholder.typicode.com/posts` y ver los datos, pero si lo quisiera hacer desde mi propia aplicación ¿como puedo mandar esos datos a consola? 
+
+### Uso del operador tap para imprimir datos a consola
+
+Un **tip** para hacerlo es imprimiendolo desde nuestro servicio. 
+
+Abramos nuestro servicio el archivo `data.service.ts` tenemos el método:
+
+```js
+getPosts() {
+    return this.http.get('https://jsonplaceholder.typicode.com/posts');
+  }
+```
+Como el `return` regresa un observable podemos trabajar con los operadores que ya vienen precargados cuando creamos una aplicación utilizando el angular CLI, solo hay que importarlos.
+
+Existe un elemento en los **[Reactive Extensions Library for JavaScript](https://rxjs-dev.firebaseapp.com/)** llamado `tap` lo importaremos con `import { tap } from 'rxjs/operators';` la función del `tap` es ejecutar una acción cuando se recibe una suscripción o cuando se optiene algun mensaje pero no tiene efectos secundarios, ni tampoco transforma la data. Para utilizarlo vamos aponer los siguiente:
+
+```js
+getPosts() {
+    return this.http.get('https://jsonplaceholder.typicode.com/posts')
+      .pipe(
+        tap( posts => {
+          console.log(posts);
+        })
+      );
+  }
+```
+
+De esta manera ya vuelve a pintar en la consola los `posts` retornados la diferencia es que ahora los hace desde el archivo `data.service.ts` y antes lo hacia desde `posts.component.ts`.
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/getPostsConInfo.png">
+
+Podriamos aun simplificar un poco más el código pero el resultado sería exactmente el mismo:
+
+```js
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+import { tap } from 'rxjs/operators';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class DataService {
+
+  constructor( private http: HttpClient) { }
+
+  getPosts() {
+    return this.http.get('https://jsonplaceholder.typicode.com/posts')
+      .pipe( tap( console.log ) );
+  }
+}
+```
