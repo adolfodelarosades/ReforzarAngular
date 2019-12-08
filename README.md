@@ -1072,3 +1072,5 @@ Vamos a cambiarlo para que quede así:
 ```
 
 Entre los corchetes se pone el nombre de la variable que declaramos con `@Input() mensaje` en el hijo y lo igualamos a `mensaje` que contiene cada post. Con esta modificación ya vuelve a cargarse correctamente los  posts. Con la diferenecia de que ahora en `posts.component.html` usamos el nuevo componente `post` que pinta solo un post que recibe desde el padre usando @input.
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/getPostsConInfo.png">
