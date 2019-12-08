@@ -1074,3 +1074,173 @@ Vamos a cambiarlo para que quede así:
 Entre los corchetes se pone el nombre de la variable que declaramos con `@Input() mensaje` en el hijo y lo igualamos a `mensaje` que contiene cada post. Con esta modificación ya vuelve a cargarse correctamente los  posts. Con la diferenecia de que ahora en `posts.component.html` usamos el nuevo componente `post` que pinta solo un post que recibe desde el padre usando @input.
 
 <img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/getPostsConInfo.png">
+
+## @Output - Emitir eventos desde el componente hijo
+
+Lo que vamos a hacer ahora es que cada que se pulse un post de la lista se pinte en consola el Id que le corresponde. Lo que queremos es emitir del hijo un mensaje que indique el evento que hizo click. Vamos a `post.component.ts` que es donde yo quiero emitir algo cuando se haga click. 
+
+### Creando el Listener
+
+Vamos a crear ese Listener que llamaremos `onClick`:
+
+```js
+onClick() {
+    console.log( this.mensaje.id );
+  }
+```
+
+Este evento `onClick` lo llamaremos cuando se haga click en cualquier lugar del `li`, vamos a `post.component.html` y ponemos:
+
+
+```js
+<li (click)="onClick()" class="list-group-item">
+  <h3>{{ mensaje.title }}</h3>
+  <p>{{ mensaje.body }} </p>
+</li>
+```
+
+Si grabamos esto y probamos:
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/getPostsId.png">
+
+Si observamos bien, el mensaje sale del `post.component.ts:18`, es decir el mensaje esta saliendo desde el el Hijo y no del Padre. ¿Como podemos hacer para que el mensaje salga desde el Padre?
+
+### Uso del decorador @Output para pasar datos del Hijo al Padre
+
+En este caso vamos a declarar un evento que recibira el padre usando el decorador `@Output`, como esto es un evento debemos ademas de importar `Output`, debemos importar `EventEmitter` de `@angular/core`, por lo que la declaración del evento queda así:
+
+```js
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+
+@Component({
+  selector: 'app-post',
+  templateUrl: './post.component.html',
+  styleUrls: ['./post.component.css']
+})
+export class PostComponent implements OnInit {
+
+  @Input() mensaje: any;
+  @Output() clickPost = new EventEmitter();
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+  onClick() {
+    console.log( this.mensaje.id );
+  }
+}
+```
+
+Ahora este evento que esta declarado en el Hijo debe ser escuchado por el Padre, para lo cual vamos a `posts.component.html` y hagos que escuche el evento del hijo poniendo el siguiente código:
+
+```js
+<app-post *ngFor="let mensaje of mensajes | async"
+          [mensaje]="mensaje"
+          (clickPost)="escuchaClick( $event )">
+</app-post>
+```
+
+Estamos añadiendo `(clickPost)="escuchaClick( $event )"` que significa que cuando el hijo emita el evento el evento escuchara `(clickPost)` y entonces ejecutara el método propio `"escuchaClick( $event )` el cual debe estar definido en `posts.component.ts`, es decir en el padre y recibe como parámetro un evento.
+
+### Definiendo el método en el padre
+
+Vamos a definir el evento que se ejecutara en el padre al escuchar al Hijo:
+
+```js
+escuchaClick( id: number ) {
+  console.log('Click en: ', id);
+}
+```
+
+Notese que el parámetro que estamos recibiendo y que hacia referencia al evento nosotros lo estamos llamando id y lo hemos definido de tipo `number` por que me lo solicita angular.
+
+### Emitir el Evento desde el Hijo al Padre
+
+Hasta aquí nos esta faltando emitir el evento del Hijo al Padre por que hasta aquí solo lo hemos definido. 
+Lo primero que tenemos qyue hacer en la definición del evento es indicar el tipo del evento que debe regresar al padre en este caso debe ser tipo `number` y esto lo hacemos usando un generico de esta forma:
+
+```js
+@Output() clickPost = new EventEmitter<number>();
+```
+Por que si no ponemos el tipo del evento, este puede recibir cualquier cosa a pesar de que en el padre dice que recibe un `number`.
+
+La otra parte que nos falta para emitir desde el Hijo al Padre, es cambiar el método `onClick` que tenemos actualmente:
+
+```js
+onClick() {
+  console.log( this.mensaje.id );
+}
+```
+ a esto:
+
+ ```js
+ onClick() {
+    this.clickPost.emit( this.mensaje.id );
+  }
+ ```
+
+ El archivo `post.component.ts` final queda asi´:
+
+ ```js
+ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+
+@Component({
+  selector: 'app-post',
+  templateUrl: './post.component.html',
+  styleUrls: ['./post.component.css']
+})
+export class PostComponent implements OnInit {
+
+  @Input() mensaje: any;
+  @Output() clickPost = new EventEmitter<number>();
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+  onClick() {
+    this.clickPost.emit( this.mensaje.id );
+  }
+}
+```
+
+Y el archivo `posts.component.ts` final queda asi´:
+
+ ```js
+ import { Component, OnInit } from '@angular/core';
+import { DataService } from 'src/app/service/data.service';
+
+@Component({
+  selector: 'app-posts',
+  templateUrl: './posts.component.html',
+  styleUrls: ['./posts.component.css']
+})
+export class PostsComponent implements OnInit {
+
+  mensajes: any;
+
+  constructor( private dataService: DataService ) { }
+
+  ngOnInit() {
+    this.mensajes = this.dataService.getPosts();
+      //.subscribe( (posts: any[] ) => {
+      //  console.log(posts);
+      //  this.mensajes = posts;
+      //});
+  }
+
+  escuchaClick( id: number ) {
+    console.log('Click en: ', id);
+  }
+}
+ ```
+
+ La pantalla final es:
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/getPostsEventoPadre.png">
+
+Notese que ahora si el evento que se ejecuta es el del padre, es decir en el Hijo sucede el evento, pero este lo emite al Padre, este lo escucha y ejecuta un método propio como respuesta.
+ 
