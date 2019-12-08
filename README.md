@@ -960,3 +960,115 @@ export class DataService {
   }
 }
 ```
+
+## @Input - Enviar información hacia un componente hijo
+
+### Creación del componente post
+
+Vamos a crear el componente `post` donde pintaremos lo referente a un post, para crearlo escribimos el comando:
+
+`ng g c pages/posts/post --spec=false`
+
+Nos indica:
+
+```
+Option "spec" is deprecated: Use "skipTests" instead.
+CREATE src/app/pages/posts/post/post.component.html (19 bytes)
+CREATE src/app/pages/posts/post/post.component.ts (261 bytes)
+CREATE src/app/pages/posts/post/post.component.css (0 bytes)
+UPDATE src/app/pages/posts/posts.module.ts (412 bytes)
+```
+Notese que Angular a detectado que tenemos el modulo `posts.module.ts` y lo ha modificado para incluir el nuevo componente `PostComponent`:
+
+```js
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+import { PostsRoutingModule } from './posts-routing.module';
+import { PostsComponent } from './posts.component';
+import { PostComponent } from './post/post.component';
+
+
+@NgModule({
+  declarations: [PostsComponent, PostComponent],
+  imports: [
+    CommonModule,
+    PostsRoutingModule
+  ]
+})
+export class PostsModule { }
+```
+
+Lo que vamos a hacer el mover todo el elemento `<li>` que tenemos en `posts.component.html` a `post.component.html` haciendo pequeños cambios en ambos archivos:
+
+`posts.component.html`
+
+```js
+<h1>Posts</h1>
+<ul class="list-group">
+  <app-post *ngFor="let mensaje of mensajes | async"></app-post>
+  <!--
+  <li *ngFor="let mensaje of mensajes | async" class="list-group-item">
+    <h3>{{ mensaje.title }}</h3>
+    <p>{{ mensaje.body }} </p>
+  </li>
+  -->
+</ul>
+```
+
+`post.component.html`
+
+```js
+<li class="list-group-item">
+  <h3>{{ mensaje.title }}</h3>
+  <p>{{ mensaje.body }} </p>
+</li>
+```
+Si cargamos la página se muestra así:
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/getPostsPostError.png">
+
+Intenta mostrar los 100 post pero no reconoce `title` en `post.component.html`, para corregir este fallo debemos mandar datos desde el Padre al Hijo que es lo que no esta pasado ahora mismo. 
+
+### Usando @Input para recibir datos del padre
+
+Vamos a `post.component.ts` vamos a declarar una propiedad que será recibida del exterior, esto se hace con `@Input() mensaje;` el `Input` debe ser importado de `@angular/core`, lo que estamos indicando que la propiedad `mensaje` será recibida desde el componente exterior sino se recibe nada será igual a `null` o `undefined`. Notese que la variable `mensaje` es el mismo nombre que tenemos en el `html`, el archivo `post.component.ts` queda así:
+
+```js
+import { Component, OnInit, Input } from '@angular/core';
+
+@Component({
+  selector: 'app-post',
+  templateUrl: './post.component.html',
+  styleUrls: ['./post.component.css']
+})
+export class PostComponent implements OnInit {
+
+  @Input() mensaje: any;
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+}
+```
+
+Ya estamos listos para recibir la propiedad `mensaje` desde el padre.
+
+### Enviar datos desde el Padre al Hijo
+
+Abrimos el archivo `posts.component.html` ahora tenemos:
+
+```js
+<app-post *ngFor="let mensaje of mensajes | async"></app-post>
+```
+
+Vamos a cambiarlo para que quede así:
+
+```js
+<app-post *ngFor="let mensaje of mensajes | async"
+          [mensaje]="mensaje">
+</app-post>
+```
+
+Entre los corchetes se pone el nombre de la variable que declaramos con `@Input() mensaje` en el hijo y lo igualamos a `mensaje` que contiene cada post. Con esta modificación ya vuelve a cargarse correctamente los  posts. Con la diferenecia de que ahora en `posts.component.html` usamos el nuevo componente `post` que pinta solo un post que recibe desde el padre usando @input.
