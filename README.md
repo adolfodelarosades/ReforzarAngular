@@ -644,7 +644,150 @@ Detecta que necesesitamos cargar todo lo referente al modulo de posts y carga el
 
 **Todo esto que hemos tenido que hacer manualmente para generear la carga perezosa o LazyLoad en Ionic lo hace automaticamente, teniendo el beneficio de que la aplicación es mucho más ligera y cuando cargue la primera pantalla posiblemente solo cargue la primera página mediante LazyLoad y la aplicación se va a desplegar en el dispositivo sumamente rapida.**
 
+## Servicios y data externa
+
+### Editando nuestro componente posts para que muestre información fija
+
+Vamos a abrir el archivo `posts.component.html` su contenido actual es:
+```
+<p>posts works!</p>
+```
+vamos a cambiarlo por el siguiente:
+
+```js
+<h1>Posts</h1>
+<ul class="list-group">
+  <li *ngFor="let post of [1,2,3,4,5]" class="list-group-item">
+    <h3>Título</h3>
+    <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Non necessitatibus incidunt voluptates, reiciendis id magnam reprehenderit recusandae maiores eum nisi facilis beatae corrupti saepe deserunt itaque molestias modi molestiae possimus!</p>
+  </li>
+</ul>
+```
+
+Lo que obtenemos es:
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/postsItemsFijos.png">
 
 
+### URL del servidor
+
+Lo ideal es que la información la recuperaramos de algun servicio, tenemos el URL:
+
+`https://jsonplaceholder.typicode.com/posts` 
+
+el cual nos regresa varios posts con los siguientes datos:
+
+```json
+{
+  "userId": 1,
+  "id": 1,
+  "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+  "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+},
+```
+
+### Creación del servicio
+
+Cuando nosotros queremos consumir este tipo de data lo mejor de todo es centralizarlo todo el lo que se conoce como `service` el cual nos permite compartir toda esta información en todos los componentes que lo requieran. Angular lo incluye de manera global con una instrucción:
+
+`ng g s service/data --spec=false`
+
+Estamos diciendo que nos cree un servicio `s` en la carpeta `service` llamado `data` y con `--spec=false` estamos indicando que no nos cree el archivo de pruebas.
+
+Nos indica:
+
+```
+Option "spec" is deprecated: Use "skipTests" instead.
+CREATE src/app/service/data.service.ts (133 bytes)
+```
+
+Noten que no modifica el archivo `app.module` por que ahora los sevicios en Angular tienen la propiedad `providedIn: 'root'` `root` indica que el servicio estara disponible de manera global en toda la aplicación. 
+
+Este servicio tendra la lógica para obtener los mensajes del URL `https://jsonplaceholder.typicode.com/posts`.
+
+### Incluir el modulo HttpClientModule en nuestro app.module
+
+Para realizar una petición http a un servidor es necesario importar un módulo, esto lo incluimos en el `app.module.ts`:
+
+`import { HttpClientModule } from '@angular/common/http';`
+
+y lo incluimos en los `imports`:
 
 
+```js
+imports: [
+  BrowserModule,
+  AppRoutingModule,
+  PagesModule,
+  HttpClientModule
+],
+```
+
+### Códificar el servicio para recuperar la información del URL
+
+Regresemos al servicio `data.service.ts`:
+
+```js
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class DataService {
+
+  constructor() { }
+}
+```
+
+Para poder hacer la petición al servidor necesitamos inyectar algo en el constructor `private http: HttpClient` asegurarse que el `HttpClient` lo importe de `@angular/common/http` por que hay otros tipos. Con esto ya podemos crear un método que me cargue la información, le llamaremos `getPosts()`, por lo que mi `data.service.ts` quedara así:
+
+```js
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class DataService {
+
+  constructor( private http: HttpClient) { }
+
+  getPosts(){
+    return this.http.get('https://jsonplaceholder.typicode.com/posts');
+  }
+}
+```
+
+### Como utilizar el servicio en el componente
+
+#### Inyectar el servicio en post.component.ts y llamar al método getPosts()
+
+Para utilizar el servicio que acabamos de hacer, abrimos el `post.component.ts`, debemos inyectar el servicio que acabamos de hacer en el contructor, ademas en el método `ngOnInit()` que es el método que se ejecuta cuando la página es cargada por primera vez, llamaremos al método que creamos en el servicio:
+
+```js
+import { Component, OnInit } from '@angular/core';
+import { DataService } from 'src/app/service/data.service';
+
+@Component({
+  selector: 'app-posts',
+  templateUrl: './posts.component.html',
+  styleUrls: ['./posts.component.css']
+})
+export class PostsComponent implements OnInit {
+
+  constructor( private dataService: DataService ) { }
+
+  ngOnInit() {
+    this.dataService.getPosts()
+      .subscribe( posts => {
+        console.log(posts);
+      });
+  }
+}
+```
+
+En teoria `this.dataService.getPosts()` llamaría al método `getPosts()` del servicio, pero `getPosts()` realmente retorna un observable, ese observable trae la información que nos interesa, pero para poder obtener esa información debemos suscribirnos (`.subscribe`), una vez suscrito el resultado se almacena en `posts`, utilizando una función de flecha imprimimos la información que nos retorna en la consola.
+
+<img src="https://github.com/adolfodelarosades/ReforzarAngular/blob/master/images/getPosts.png">
+
+Podemos observar como recupera hasta 100 post.
